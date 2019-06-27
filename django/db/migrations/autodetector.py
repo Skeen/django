@@ -14,6 +14,8 @@ from django.db.migrations.utils import (
 )
 from django.utils.topological_sort import stable_topological_sort
 
+automigrate = Signal()
+
 
 class MigrationAutodetector:
     """
@@ -190,6 +192,7 @@ class MigrationAutodetector:
         self.generate_added_constraints()
         self.generate_altered_db_table()
         self.generate_altered_order_with_respect_to()
+        self.generate_signal()
 
         self._sort_migrations()
         self._build_migration_list(graph)
@@ -843,6 +846,9 @@ class MigrationAutodetector:
                             self.old_field_keys.add((app_label, model_name, field_name))
                             self.renamed_fields[app_label, model_name, field_name] = rem_field_name
                             break
+
+    def generate_signals(self):
+        automigrate.send(sender=self)
 
     def generate_added_fields(self):
         """Make AddField operations."""
