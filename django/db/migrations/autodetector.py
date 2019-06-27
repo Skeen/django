@@ -14,6 +14,7 @@ from django.db.migrations.utils import (
 )
 from django.utils.topological_sort import stable_topological_sort
 
+from django.dispatch import Signal
 automigrate = Signal()
 
 
