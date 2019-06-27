@@ -848,7 +848,7 @@ class MigrationAutodetector:
                             self.renamed_fields[app_label, model_name, field_name] = rem_field_name
                             break
 
-    def generate_signals(self):
+    def generate_signal(self):
         automigrate.send(sender=self)
 
     def generate_added_fields(self):
