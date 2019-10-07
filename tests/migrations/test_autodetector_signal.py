@@ -53,6 +53,16 @@ class AutodetectorSignalTests(TestCase):
         ("id", models.AutoField(primary_key=True)),
     ], {"comment": "Creator of a book"})
 
+    def setUp(self):
+        # Save up the number of connected signals so that we can check at the
+        # end that all the signals we register get properly unregistered (#9989)
+        self.pre_signals = len(automigrate.receivers)
+
+    def tearDown(self):
+        # All our signals got disconnected properly.
+        post_signals = len(automigrate.receivers)
+        self.assertEqual(self.pre_signals, post_signals)
+
     def repr_changes(self, changes, include_dependencies=False):
         output = ""
         for app_label, migrations in sorted(changes.items()):
@@ -118,6 +128,8 @@ class AutodetectorSignalTests(TestCase):
         automigrate.connect(my_callback1)
         automigrate.connect(my_callback2)
         changes = self.get_changes([self.author_empty], [self.author_empty])
+        automigrate.disconnect(my_callback1)
+        automigrate.disconnect(my_callback2)
         self.assertTrue(fired['my_callback1'])
         self.assertTrue(fired['my_callback2'])
         self.assertNumberMigrations(changes, 'testapp', 0)
@@ -139,6 +151,7 @@ class AutodetectorSignalTests(TestCase):
         # Signal makes it equivalent to ([self.author_empty], [self.author_name])
         automigrate.connect(add_field_callback)
         changes = self.get_changes([self.author_empty], [self.author_empty])
+        automigrate.disconnect(add_field_callback)
         # Right number/type of migrations?
         self.assertNumberMigrations(changes, 'testapp', 1)
         self.assertOperationTypes(changes, 'testapp', 0, ["AddField"])
@@ -150,6 +163,7 @@ class AutodetectorSignalTests(TestCase):
         # Add/Remove comments
         automigrate.connect(comment_callback)
         changes = self.get_changes([self.author_with_comment_options], [self.author_with_comment_options])
+        automigrate.disconnect(comment_callback)
         # Right number/type of migrations?
         self.assertNumberMigrations(changes, 'testapp', 0)
 
@@ -160,6 +174,7 @@ class AutodetectorSignalTests(TestCase):
         # Add/Remove comments
         automigrate.connect(comment_callback)
         changes = self.get_changes([self.author_empty], [self.author_with_comment_options])
+        automigrate.disconnect(comment_callback)
         # Right number/type of migrations?
         self.assertNumberMigrations(changes, 'testapp', 1)
         self.assertOperationTypes(changes, 'testapp', 0, ["AddComment"])
@@ -171,6 +186,7 @@ class AutodetectorSignalTests(TestCase):
         # Add/Remove comments
         automigrate.connect(comment_callback)
         changes = self.get_changes([self.author_with_comment_options], [self.author_empty])
+        automigrate.disconnect(comment_callback)
         # Right number/type of migrations?
         self.assertNumberMigrations(changes, 'testapp', 1)
         self.assertOperationTypes(changes, 'testapp', 0, ["RemoveComment"])
@@ -182,6 +198,7 @@ class AutodetectorSignalTests(TestCase):
         # Add/Remove comments
         automigrate.connect(comment_callback)
         changes = self.get_changes([self.author_with_comment_options], [self.author_with_new_comment_options])
+        automigrate.disconnect(comment_callback)
         # Right number/type of migrations?
         self.assertNumberMigrations(changes, 'testapp', 1)
         self.assertOperationTypes(changes, 'testapp', 0, ["AddComment", "RemoveComment"])
