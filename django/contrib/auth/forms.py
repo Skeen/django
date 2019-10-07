@@ -62,9 +62,11 @@ class UsernameField(forms.CharField):
         return unicodedata.normalize('NFKC', super().to_python(value))
 
     def widget_attrs(self, widget):
-        attrs = super().widget_attrs(widget)
-        attrs['autocapitalize'] = 'none'
-        return attrs
+        return {
+            **super().widget_attrs(widget),
+            'autocapitalize': 'none',
+            'autocomplete': 'username',
+        }
 
 
 class UserCreationForm(forms.ModelForm):
@@ -73,7 +75,7 @@ class UserCreationForm(forms.ModelForm):
     password.
     """
     error_messages = {
-        'password_mismatch': _("The two password fields didn't match."),
+        'password_mismatch': _('The two password fields didn’t match.'),
     }
     password1 = forms.CharField(
         label=_("Password"),
@@ -96,10 +98,7 @@ class UserCreationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self._meta.model.USERNAME_FIELD in self.fields:
-            self.fields[self._meta.model.USERNAME_FIELD].widget.attrs.update({
-                'autocomplete': 'username',
-                'autofocus': True,
-            })
+            self.fields[self._meta.model.USERNAME_FIELD].widget.attrs['autofocus'] = True
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
@@ -134,9 +133,9 @@ class UserChangeForm(forms.ModelForm):
     password = ReadOnlyPasswordHashField(
         label=_("Password"),
         help_text=_(
-            "Raw passwords are not stored, so there is no way to see this "
-            "user's password, but you can change the password using "
-            "<a href=\"{}\">this form</a>."
+            'Raw passwords are not stored, so there is no way to see this '
+            'user’s password, but you can change the password using '
+            '<a href="{}">this form</a>.'
         ),
     )
 
@@ -166,7 +165,7 @@ class AuthenticationForm(forms.Form):
     Base class for authenticating users. Extend this to get a form that accepts
     username/password logins.
     """
-    username = UsernameField(widget=forms.TextInput(attrs={'autocomplete': 'username', 'autofocus': True}))
+    username = UsernameField(widget=forms.TextInput(attrs={'autofocus': True}))
     password = forms.CharField(
         label=_("Password"),
         strip=False,
@@ -192,7 +191,9 @@ class AuthenticationForm(forms.Form):
 
         # Set the max length and label for the "username" field.
         self.username_field = UserModel._meta.get_field(UserModel.USERNAME_FIELD)
-        self.fields['username'].max_length = self.username_field.max_length or 254
+        username_max_length = self.username_field.max_length or 254
+        self.fields['username'].max_length = username_max_length
+        self.fields['username'].widget.attrs['maxlength'] = username_max_length
         if self.fields['username'].label is None:
             self.fields['username'].label = capfirst(self.username_field.verbose_name)
 
@@ -314,7 +315,7 @@ class SetPasswordForm(forms.Form):
     password
     """
     error_messages = {
-        'password_mismatch': _("The two password fields didn't match."),
+        'password_mismatch': _('The two password fields didn’t match.'),
     }
     new_password1 = forms.CharField(
         label=_("New password"),
@@ -387,7 +388,7 @@ class AdminPasswordChangeForm(forms.Form):
     A form used to change the password of a user in the admin interface.
     """
     error_messages = {
-        'password_mismatch': _("The two password fields didn't match."),
+        'password_mismatch': _('The two password fields didn’t match.'),
     }
     required_css_class = 'required'
     password1 = forms.CharField(

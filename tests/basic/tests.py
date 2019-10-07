@@ -1,5 +1,6 @@
 import threading
 from datetime import datetime, timedelta
+from unittest import mock
 
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from django.db import DEFAULT_DB_ALIAS, DatabaseError, connections, models
@@ -10,7 +11,10 @@ from django.test import (
 )
 from django.utils.translation import gettext_lazy
 
-from .models import Article, ArticleSelectOnSave, FeaturedArticle, SelfRef
+from .models import (
+    Article, ArticleSelectOnSave, FeaturedArticle, PrimaryKeyWithDefault,
+    SelfRef,
+)
 
 
 class ModelInstanceCreationTests(TestCase):
@@ -129,6 +133,11 @@ class ModelInstanceCreationTests(TestCase):
         self.assertIn(a, Article.objects.all())
         # ... but there will often be more efficient ways if that is all you need:
         self.assertTrue(Article.objects.filter(id=a.id).exists())
+
+    def test_save_primary_with_default(self):
+        # An UPDATE attempt is skipped when a primary key has default.
+        with self.assertNumQueries(1):
+            PrimaryKeyWithDefault().save()
 
 
 class ModelTest(TestCase):
@@ -346,6 +355,7 @@ class ModelTest(TestCase):
         self.assertNotEqual(object(), Article(id=1))
         a = Article()
         self.assertEqual(a, a)
+        self.assertEqual(a, mock.ANY)
         self.assertNotEqual(Article(), a)
 
     def test_hash(self):

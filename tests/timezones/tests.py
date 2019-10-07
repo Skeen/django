@@ -153,6 +153,7 @@ class LegacyDatabaseTests(TestCase):
         self.assertEqual(Event.objects.filter(dt__month=1).count(), 2)
         self.assertEqual(Event.objects.filter(dt__day=1).count(), 2)
         self.assertEqual(Event.objects.filter(dt__week_day=7).count(), 2)
+        self.assertEqual(Event.objects.filter(dt__iso_week_day=6).count(), 2)
         self.assertEqual(Event.objects.filter(dt__hour=1).count(), 1)
         self.assertEqual(Event.objects.filter(dt__minute=30).count(), 2)
         self.assertEqual(Event.objects.filter(dt__second=0).count(), 2)
@@ -366,6 +367,7 @@ class NewDatabaseTests(TestCase):
         self.assertEqual(Event.objects.filter(dt__month=1).count(), 2)
         self.assertEqual(Event.objects.filter(dt__day=1).count(), 2)
         self.assertEqual(Event.objects.filter(dt__week_day=7).count(), 2)
+        self.assertEqual(Event.objects.filter(dt__iso_week_day=6).count(), 2)
         self.assertEqual(Event.objects.filter(dt__hour=1).count(), 1)
         self.assertEqual(Event.objects.filter(dt__minute=30).count(), 2)
         self.assertEqual(Event.objects.filter(dt__second=0).count(), 2)
@@ -381,6 +383,7 @@ class NewDatabaseTests(TestCase):
             self.assertEqual(Event.objects.filter(dt__month=1).count(), 1)
             self.assertEqual(Event.objects.filter(dt__day=1).count(), 1)
             self.assertEqual(Event.objects.filter(dt__week_day=7).count(), 1)
+            self.assertEqual(Event.objects.filter(dt__iso_week_day=6).count(), 1)
             self.assertEqual(Event.objects.filter(dt__hour=22).count(), 1)
             self.assertEqual(Event.objects.filter(dt__minute=30).count(), 2)
             self.assertEqual(Event.objects.filter(dt__second=0).count(), 2)
@@ -1103,8 +1106,8 @@ class NewFormsTests(TestCase):
             self.assertFalse(form.is_valid())
             self.assertEqual(
                 form.errors['dt'], [
-                    "2011-03-27 02:30:00 couldn't be interpreted in time zone "
-                    "Europe/Paris; it may be ambiguous or it may not exist."
+                    '2011-03-27 02:30:00 couldn’t be interpreted in time zone '
+                    'Europe/Paris; it may be ambiguous or it may not exist.'
                 ]
             )
 
@@ -1114,8 +1117,8 @@ class NewFormsTests(TestCase):
             self.assertFalse(form.is_valid())
             self.assertEqual(
                 form.errors['dt'], [
-                    "2011-10-30 02:30:00 couldn't be interpreted in time zone "
-                    "Europe/Paris; it may be ambiguous or it may not exist."
+                    '2011-10-30 02:30:00 couldn’t be interpreted in time zone '
+                    'Europe/Paris; it may be ambiguous or it may not exist.'
                 ]
             )
 

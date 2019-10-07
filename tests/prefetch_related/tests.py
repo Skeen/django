@@ -1,3 +1,5 @@
+from unittest import mock
+
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import connection
@@ -204,7 +206,7 @@ class PrefetchRelatedTests(TestDataMixin, TestCase):
 
     def test_reverse_one_to_one_then_m2m(self):
         """
-        A m2m relation can be followed afterr going through the select_related
+        A m2m relation can be followed after going through the select_related
         reverse of an o2o.
         """
         qs = Author.objects.prefetch_related('bio__books').select_related('bio')
@@ -238,6 +240,13 @@ class PrefetchRelatedTests(TestDataMixin, TestCase):
 
         self.assertIn('prefetch_related', str(cm.exception))
         self.assertIn("name", str(cm.exception))
+
+    def test_prefetch_eq(self):
+        prefetch_1 = Prefetch('authors', queryset=Author.objects.all())
+        prefetch_2 = Prefetch('books', queryset=Book.objects.all())
+        self.assertEqual(prefetch_1, prefetch_1)
+        self.assertEqual(prefetch_1, mock.ANY)
+        self.assertNotEqual(prefetch_1, prefetch_2)
 
     def test_forward_m2m_to_attr_conflict(self):
         msg = 'to_attr=authors conflicts with a field on the Book model.'
@@ -1363,7 +1372,7 @@ class Ticket21760Tests(TestCase):
         self.assertNotIn(' JOIN ', str(queryset.query))
 
 
-class DirectPrefechedObjectCacheReuseTests(TestCase):
+class DirectPrefetchedObjectCacheReuseTests(TestCase):
     """
     prefetch_related() reuses objects fetched in _prefetched_objects_cache.
 

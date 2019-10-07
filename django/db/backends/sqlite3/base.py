@@ -104,6 +104,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
         'PositiveIntegerField': 'integer unsigned',
         'PositiveSmallIntegerField': 'smallint unsigned',
         'SlugField': 'varchar(%(max_length)s)',
+        'SmallAutoField': 'integer',
         'SmallIntegerField': 'smallint',
         'TextField': 'text',
         'TimeField': 'time',
@@ -116,6 +117,7 @@ class DatabaseWrapper(BaseDatabaseWrapper):
     data_types_suffix = {
         'AutoField': 'AUTOINCREMENT',
         'BigAutoField': 'AUTOINCREMENT',
+        'SmallAutoField': 'AUTOINCREMENT',
     }
     # SQLite requires LIKE statements to include an ESCAPE clause if the value
     # being escaped has a percent or underscore in it.
@@ -476,6 +478,8 @@ def _sqlite_datetime_extract(lookup_type, dt, tzname=None, conn_tzname=None):
         return None
     if lookup_type == 'week_day':
         return (dt.isoweekday() % 7) + 1
+    elif lookup_type == 'iso_week_day':
+        return dt.isoweekday()
     elif lookup_type == 'week':
         return dt.isocalendar()[1]
     elif lookup_type == 'quarter':

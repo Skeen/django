@@ -55,9 +55,7 @@ import re
 from enum import Enum
 from inspect import getcallargs, getfullargspec, unwrap
 
-from django.template.context import (  # NOQA: imported for backwards compatibility
-    BaseContext, Context, ContextPopException, RequestContext,
-)
+from django.template.context import BaseContext
 from django.utils.formats import localize
 from django.utils.html import conditional_escape, escape
 from django.utils.safestring import SafeData, mark_safe
@@ -176,7 +174,7 @@ class Template:
         """
         Parse and compile the template source into a nodelist. If debug
         is True and an exception occurs during parsing, the exception is
-        is annotated with contextual line information where it occurred in the
+        annotated with contextual line information where it occurred in the
         template source.
         """
         if self.engine.debug:
