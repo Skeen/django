@@ -4,6 +4,7 @@ from itertools import chain
 
 from django.conf import settings
 from django.db import models
+from django.db.models.signals import pre_autodetect, post_autodetect
 from django.db.migrations import operations
 from django.db.migrations.migration import Migration
 from django.db.migrations.operations.models import AlterModelOptions
@@ -13,9 +14,6 @@ from django.db.migrations.utils import (
     COMPILED_REGEX_TYPE, RegexObject, get_migration_name_timestamp,
 )
 from django.utils.topological_sort import stable_topological_sort
-
-from django.dispatch import Signal
-automigrate = Signal()
 
 
 class MigrationAutodetector:
@@ -166,6 +164,9 @@ class MigrationAutodetector:
         self._prepare_field_lists()
         self._generate_through_model_map()
 
+        # Send our pre-autodetect signal
+        pre_autodetect.send(sender=self)
+
         # Generate non-rename model operations
         self.generate_deleted_models()
         self.generate_created_models()
@@ -193,7 +194,9 @@ class MigrationAutodetector:
         self.generate_added_constraints()
         self.generate_altered_db_table()
         self.generate_altered_order_with_respect_to()
-        self.generate_signal()
+
+        # Send our post-autodetect signal
+        post_autodetect.send(sender=self)
 
         self._sort_migrations()
         self._build_migration_list(graph)
@@ -847,9 +850,6 @@ class MigrationAutodetector:
                             self.old_field_keys.add((app_label, model_name, field_name))
                             self.renamed_fields[app_label, model_name, field_name] = rem_field_name
                             break
-
-    def generate_signal(self):
-        automigrate.send(sender=self)
 
     def generate_added_fields(self):
         """Make AddField operations."""
