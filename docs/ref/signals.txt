@@ -521,7 +521,7 @@ For example, you could register a callback in an
     new ``AppConfig`` instance.
 
 ``pre_autodetect``
-----------------
+------------------
 
 .. data:: django.db.models.signals.pre_autodetect
    :module:
@@ -540,9 +540,10 @@ Arguments sent with this signal:
 ``sender``
     The autodetector object itself.
 
+.. versionadded:: 3.0
 
 ``post_autodetect``
-----------------
+-------------------
 
 .. data:: django.db.models.signals.pre_autodetect
    :module:
@@ -561,6 +562,7 @@ Arguments sent with this signal:
 ``sender``
     The autodetector object itself.
 
+.. versionadded:: 3.0
 
 Request/response signals
 ========================
