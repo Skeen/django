@@ -4,6 +4,7 @@ from itertools import chain
 
 from django.conf import settings
 from django.db import models
+from django.db.models.signals import pre_autodetect, post_autodetect
 from django.db.migrations import operations
 from django.db.migrations.migration import Migration
 from django.db.migrations.operations.models import AlterModelOptions
@@ -163,6 +164,9 @@ class MigrationAutodetector:
         self._prepare_field_lists()
         self._generate_through_model_map()
 
+        # Send our pre-autodetect signal
+        pre_autodetect.send(sender=self)
+
         # Generate non-rename model operations
         self.generate_deleted_models()
         self.generate_created_models()
@@ -190,6 +194,9 @@ class MigrationAutodetector:
         self.generate_added_constraints()
         self.generate_altered_db_table()
         self.generate_altered_order_with_respect_to()
+
+        # Send our post-autodetect signal
+        post_autodetect.send(sender=self)
 
         self._sort_migrations()
         self._build_migration_list(graph)
